@@ -13,7 +13,7 @@ class Synth1Dataset(Dataset):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.logger.info("Loading Synth1PresetDataset...")
-        self.base_data = load_dataset("hel-kun/Synth1PresetDataset", token=TOKEN, trust_remote_code=True, version="1.0.1")
+        self.base_data = load_dataset("hel-kun/Synth1PresetDataset", token=TOKEN, trust_remote_code=True, version="1.0.2")
         self.dataset = self.preprocess()
 
     def preprocess(self):
