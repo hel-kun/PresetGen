@@ -9,7 +9,6 @@ from config import DEVICE
 from utils.types import *
 from utils.plot import plot_loss_curve
 
-# TODO: trainer.pyの実装
 class Trainer():
     def __init__(
         self,
