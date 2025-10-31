@@ -90,11 +90,11 @@ class DualStreamTransformerDecoderLayer(nn.Module):
     # self-attention block
     def _sa_block(
         self,
-        x: nn.Tensor,
-        attn_mask: Optional[nn.Tensor],
-        key_padding_mask: Optional[nn.Tensor],
+        x: Tensor,
+        attn_mask: Optional[Tensor],
+        key_padding_mask: Optional[Tensor],
         is_causal: bool = False
-    ) -> nn.Tensor:
+    ) -> Tensor:
         x = self.self_attn(
             x, x, x,
             attn_mask=attn_mask,
@@ -106,12 +106,12 @@ class DualStreamTransformerDecoderLayer(nn.Module):
     
     def _mha_block(
         self,
-        x: nn.Tensor,
-        memory: nn.Tensor,
-        attn_mask: Optional[nn.Tensor],
-        key_padding_mask: Optional[nn.Tensor],
+        x: Tensor,
+        memory: Tensor,
+        attn_mask: Optional[Tensor],
+        key_padding_mask: Optional[Tensor],
         is_causal: bool = False
-    ) -> nn.Tensor:
+    ) -> Tensor:
         x = self.multihead_attn(
             x, memory, memory,
             attn_mask=attn_mask,
@@ -123,12 +123,12 @@ class DualStreamTransformerDecoderLayer(nn.Module):
     
     def _cs_block(
         self,
-        x: nn.Tensor,
-        cross_stream_memory: nn.Tensor,
-        attn_mask: Optional[nn.Tensor],
-        key_padding_mask: Optional[nn.Tensor],
+        x: Tensor,
+        cross_stream_memory: Tensor,
+        attn_mask: Optional[Tensor],
+        key_padding_mask: Optional[Tensor],
         is_causal: bool = False
-    ) -> nn.Tensor:
+    ) -> Tensor:
         x = self.cross_stream_attn(
             x, cross_stream_memory, cross_stream_memory,
             attn_mask=attn_mask,
@@ -138,7 +138,7 @@ class DualStreamTransformerDecoderLayer(nn.Module):
         )[0]
         return self.dropout3(x)
     
-    def _ffn_block(self, x: nn.Tensor) -> nn.Tensor:
+    def _ffn_block(self, x: Tensor) -> Tensor:
         x = self.linear2(self.dropout4(F.gelu(self.linear1(x))))
         return self.dropout5(x)
 
