@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from typing import Optional
-import logger, tqdm, os
+import logging, tqdm, os
 from model.model import PresetGenModel
 from model.loss import ParamsLoss, AudioEmbedLoss
 from dataset.dataset import Synth1Dataset
@@ -32,6 +32,8 @@ class Trainer():
         self.early_stopping_counter = 0
         self.train_losses = []
         self.val_losses = []
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
 
         dataset = dataset
         self.train_dataloader = DataLoader(dataset.dataset['train'], batch_size=32, shuffle=True)
@@ -42,7 +44,7 @@ class Trainer():
         start_epoch = 0
         if resume_from_checkpoint:
             start_epoch = self._load_checkpoint(resume_from_checkpoint)
-            logger.info(f"Resumed training from checkpoint: {resume_from_checkpoint} at epoch {start_epoch}")
+            self.logger.info(f"Resumed training from checkpoint: {resume_from_checkpoint} at epoch {start_epoch}")
 
         for epoch in range(start_epoch, num_epochs):
             self.model.train()
@@ -75,7 +77,7 @@ class Trainer():
                 val_loss = self.evaluate(self.val_dataloader)
                 self.val_losses.append(val_loss)
 
-                logger.info(f"Epoch {epoch+1}/{num_epochs} - Train Loss: {avg_epoch_loss:.4f}, Val Loss: {val_loss:.4f}")
+                self.logger.info(f"Epoch {epoch+1}/{num_epochs} - Train Loss: {avg_epoch_loss:.4f}, Val Loss: {val_loss:.4f}")
 
                 if val_loss < self.best_loss:
                     self.best_loss = val_loss
@@ -84,7 +86,7 @@ class Trainer():
                 else:
                     self.early_stopping_counter += 1
                     if self.early_stopping_counter >= self.early_stopping_patience:
-                        logger.info("Early stopping triggered.")
+                        self.logger.info("Early stopping triggered.")
                         break
 
             plot_loss_curve(self.train_losses, self.val_losses, save_path=f"{self.checkpoint_path}/loss_curve.png")
@@ -152,13 +154,13 @@ class Trainer():
         cont_mae = cont_mae / cont_count if cont_count > 0 else 0.0
         avg_loss = total_loss / len(data_loader)
 
-        logger.info(f"Detailed Evaluation - Total Avg Loss: {avg_loss:.4f}")
-        logger.info(f"Continuous Params MAE: {cont_mae:.4f}")
-        logger.info(f"Categorical Params Overall Accuracy: {categ_correct / categ_total if categ_total > 0 else 0.0:.4f}")
+        self.logger.info(f"Detailed Evaluation - Total Avg Loss: {avg_loss:.4f}")
+        self.logger.info(f"Continuous Params MAE: {cont_mae:.4f}")
+        self.logger.info(f"Categorical Params Overall Accuracy: {categ_correct / categ_total if categ_total > 0 else 0.0:.4f}")
 
         for param_name in categ_accuracies.keys():
             accuracy = categ_accuracies[param_name] / categ_total if categ_total > 0 else 0.0
-            logger.info(f"Categorical Param: {param_name}, Accuracy: {accuracy:.4f}")
+            self.logger.info(f"Categorical Param: {param_name}, Accuracy: {accuracy:.4f}")
 
         # save detailed results to a text file
         with open(f"{self.checkpoint_path}/detailed_evaluation.txt", "w") as f:
@@ -183,7 +185,7 @@ class Trainer():
             'val_losses': self.val_losses
         }, path)
         if is_best:
-            logger.info(f"Saved best model checkpoint to {path}")
+            self.logger.info(f"Saved best model checkpoint to {path}")
 
     def _load_checkpoint(self, checkpoint_path: str):
         checkpoint = torch.load(checkpoint_path, map_location=DEVICE)
