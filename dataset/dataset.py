@@ -1,5 +1,5 @@
 import os, re
-import tqdm
+import tqdm, logging
 from datasets import load_dataset
 from torch.utils.data import Dataset
 from dotenv import load_dotenv
@@ -10,7 +10,9 @@ class Synth1Dataset(Dataset):
     def __init__(self):
         load_dotenv()
         TOKEN = os.getenv("HF_TOKEN")
-        print("Loading Synth1PresetDataset...")
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        self.logger.info("Loading Synth1PresetDataset...")
         self.base_data = load_dataset("hel-kun/Synth1PresetDataset", token=TOKEN, trust_remote_code=True, version="1.0.1")
         self.dataset = self.preprocess()
 
@@ -52,13 +54,16 @@ class Synth1Dataset(Dataset):
         
         for name, default in CATEGORICAL_DEFAULTS.items():
             if name not in categorical_params:
+                self.logger.warning(f"Categorical param {name} missing in preset, setting to default value {default}.")
                 categorical_params[name] = default
         for name, default in CONTINUOUS_DEFAULTS.items():
             if name not in continuius_params:
                 continuius_params[name] = default
+                self.logger.warning(f"Continuous param {name} missing in preset, setting to default value {default}.")
         for name, default in MISC_DEFAULTS.items():
             if name not in misc_params:
                 misc_params[name] = default
+                self.logger.warning(f"Misc param {name} missing in preset, setting to default value {default}.")
     
         return Synth1Preset(
             categorical_param = CategoricalParam(**categorical_params),
