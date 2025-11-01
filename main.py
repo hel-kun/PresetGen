@@ -11,7 +11,7 @@ from config import DEVICE
 def main(args):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    dataset = Synth1Dataset()
+    dataset = Synth1Dataset(logger=logger)
     model = PresetGenModel(
         embedding_dim=args.embedding_dim,
         num_heads=args.num_heads,
@@ -32,6 +32,7 @@ def main(args):
         optimizer=torch.optim.Adam(model.parameters(), lr=args.learning_rate),
         criterion=ParamsLoss(),
         early_stopping_patience=args.es_patience,
+        logger=logger
     )
     if not args.eval_only:
         trainer.train(
