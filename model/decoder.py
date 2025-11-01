@@ -3,7 +3,6 @@ from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple, Union, Callable
-import logging
 from utils.types import *
 from utils.param import *
 

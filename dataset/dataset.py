@@ -7,11 +7,10 @@ from utils.types import *
 from utils.param import *
 
 class Synth1Dataset(Dataset):
-    def __init__(self):
+    def __init__(self, logger: logging.Logger = None):
         load_dotenv()
         TOKEN = os.getenv("HF_TOKEN")
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+        self.logger = logger or logging.getLogger(__name__)
         self.logger.info("Loading Synth1PresetDataset...")
         self.base_data = load_dataset("hel-kun/Synth1PresetDataset", token=TOKEN, trust_remote_code=True, version="1.0.2")
         self.dataset = self.preprocess()

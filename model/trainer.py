@@ -20,6 +20,7 @@ class Trainer():
         checkpoint_path: str = 'checkpoints',
         log_interval=10,
         early_stopping_patience=10,
+        logger: Optional[logging.Logger] = None
     ):
         self.model = model.to(DEVICE)
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(self.model.parameters(), lr=0.001)
@@ -32,8 +33,7 @@ class Trainer():
         self.early_stopping_counter = 0
         self.train_losses = []
         self.val_losses = []
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+        self.logger = logger or logging.getLogger(__name__)
 
         dataset = dataset
         self.train_dataloader = DataLoader(dataset.dataset['train'], batch_size=32, shuffle=True)

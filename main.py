@@ -1,5 +1,6 @@
 import argparse
 from datetime import datetime
+import logging
 import torch
 from dataset.dataset import Synth1Dataset
 from model.model import PresetGenModel
@@ -8,6 +9,8 @@ from model.loss import ParamsLoss
 from config import DEVICE
 
 def main(args):
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
     dataset = Synth1Dataset()
     model = PresetGenModel(
         embedding_dim=args.embedding_dim,
