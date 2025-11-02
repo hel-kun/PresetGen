@@ -55,7 +55,7 @@ class ParamsLoss(nn.Module):
             categ_loss = torch.tensor(0.0, device=DEVICE)
 
         total_loss = self.cont_weight * cont_loss + self.categ_weight * categ_loss
-        return total_loss, self.cont_weight * cont_loss, self.categ_weight * categ_loss
+        return total_loss, self.categ_weight * categ_loss, self.cont_weight * cont_loss
 
 
 # TODO: AudioEmbedLossの実装

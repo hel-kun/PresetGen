@@ -9,10 +9,10 @@ class CategoricalParam:
   osc2_sync: Literal[0, 1] # 0: Off, 1: On
   osc2_ring_modulation: Literal[0, 1] # 0: Off, 1: On
   osc_mod_env_on_off: Literal[0, 1] # 0: Off, 1: On
-  filter_type: Literal[0, 1, 2, 3, 4] # LP12/LP24/HP12/BP12 (の4つなのに何故か5つある)
+  filter_type: Literal[0, 1, 2, 3, 4, 5] # LP12/LP24/HP12/BP12 (の4つなのに何故か5つある)
   filter_velocity_switch: Literal[0, 1] # 0: Off, 1: On
   arpeggiator_type: Literal[0, 1, 2, 3, 4] # 0: None
-  arpeggiator_oct_range: Literal[0, 1, 2, 3]
+  arpeggiator_oct_range: Literal[0, 1, 2, 3, 4]
   play_mode_type: Literal[0, 1, 2] # Poly/Mono/Legato
   lfo1_destination: Literal[0, 1, 2, 3, 4, 5, 6, 7] # 0: None, 1~7
   lfo1_type: Literal[0, 1, 2, 3, 4, 5]
