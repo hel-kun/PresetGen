@@ -22,8 +22,8 @@ class PresetGenModel(nn.Module):
             # 推論モード(のはず)
             batch_size = text_embeddings.size(0)
             tgt = {
-                'continuous': torch.zeros(batch_size, 1, self.embedding_dim).to(DEVICE),
-                'categorical': torch.zeros(batch_size, 1, self.embedding_dim).to(DEVICE)
+                'cont': torch.zeros(batch_size, 1, self.embedding_dim),
+                'categ': torch.zeros(batch_size, 1, self.embedding_dim)
             }
 
         if isinstance(self.text_encoder, RoBERTaTextEncorder):
@@ -31,8 +31,9 @@ class PresetGenModel(nn.Module):
         else:
             memory_key_padding_mask = None
         outputs = self.decoder(
-            tgt,
-            text_embeddings,
+            tgt_cont=tgt['cont'].to(DEVICE),
+            tgt_categ=tgt['categ'].to(DEVICE),
+            memory=text_embeddings,
             memory_key_padding_mask=memory_key_padding_mask
         )
 

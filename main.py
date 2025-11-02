@@ -11,7 +11,7 @@ from config import DEVICE
 def main(args):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    dataset = Synth1Dataset(logger=logger)
+    dataset = Synth1Dataset(logger=logger, embed_dim=args.embedding_dim)
     model = PresetGenModel(
         embedding_dim=args.embedding_dim,
         num_heads=args.num_heads,

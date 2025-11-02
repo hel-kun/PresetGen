@@ -1,5 +1,6 @@
 import os, re
 import tqdm, logging
+import torch
 from datasets import load_dataset
 from torch.utils.data import Dataset
 from dotenv import load_dotenv
@@ -7,12 +8,13 @@ from utils.types import *
 from utils.param import *
 
 class Synth1Dataset(Dataset):
-    def __init__(self, logger: logging.Logger = None):
+    def __init__(self, logger: logging.Logger = None, embed_dim: int = 512):
         load_dotenv()
         TOKEN = os.getenv("HF_TOKEN")
         self.logger = logger or logging.getLogger(__name__)
         self.logger.info("Loading Synth1PresetDataset...")
         self.base_data = load_dataset("hel-kun/Synth1PresetDataset", token=TOKEN, trust_remote_code=True, version="1.0.2")
+        self.embed_dim = embed_dim
         self.dataset = self.preprocess()
 
     def preprocess(self):
@@ -79,17 +81,51 @@ class Synth1Dataset(Dataset):
     
     def collate_fn(self, batch):
         texts = []
-        params_batch = []
+        categ_params = {}
+        cont_params = {}
+        misc_params = {}
+
+        # param_nameの取得
+        for name in CATEGORICAL_PARAM_NAMES:
+            categ_params[name] = []
+        for name in CONTINUOUS_PARAM_NAMES:
+            cont_params[name] = []
+        for name in MISC_PARAM_NAMES:
+            misc_params[name] = []
+
         for item in batch:
             label = item["label"]
             text = label["text"]
             texts.append(text)
             preset = item["preset"]
-            param_dict = {
-                "categorical": {k: v for k, v in preset.categorical_param.__dict__.items()},
-                "continuius": {k: v for k, v in preset.continuius_param.__dict__.items()},
-                "misc": {k: v for k, v in preset.misc_param.__dict__.items()}
-            }
-            params_batch.append(param_dict)
-  
-        return texts, params_batch                                                                
+            for name in CATEGORICAL_PARAM_NAMES:
+                categ_params[name].append(getattr(preset.categorical_param, name))
+            for name in CONTINUOUS_PARAM_NAMES:
+                cont_params[name].append(getattr(preset.continuius_param, name))
+            for name in MISC_PARAM_NAMES:
+                misc_params[name].append(getattr(preset.misc_param, name))
+            
+        for name in CATEGORICAL_PARAM_NAMES:
+            categ_params[name] = torch.tensor(categ_params[name], dtype=torch.long)
+        for name in CONTINUOUS_PARAM_NAMES:
+            cont_params[name] = torch.tensor(cont_params[name], dtype=torch.float)
+        for name in MISC_PARAM_NAMES:
+            misc_params[name] = torch.tensor(misc_params[name], dtype=torch.float)
+
+        batch_size = len(batch)
+
+        categ_embed = torch.zeros(batch_size, 1, self.embed_dim)
+        cont_embed = torch.zeros(batch_size, 1, self.embed_dim)
+        misc_embed = torch.zeros(batch_size, 1, self.embed_dim)
+
+        tensor_batch = {
+            'categ': categ_embed,
+            'cont': cont_embed,
+            'misc': misc_embed
+        }
+        params_batch = {
+            'categ': categ_params,
+            'cont': cont_params,
+            'misc': misc_params
+        }
+        return texts, tensor_batch, params_batch                                                        

@@ -7,6 +7,7 @@ from model.loss import ParamsLoss, AudioEmbedLoss
 from dataset.dataset import Synth1Dataset
 from config import DEVICE
 from utils.types import *
+from utils.param import *
 from utils.plot import plot_loss_curve
 
 class Trainer():
@@ -53,13 +54,14 @@ class Trainer():
             train_bar = tqdm.tqdm(total=len(self.train_dataloader), desc=f"Epoch {epoch+1}/{num_epochs}", postfix="total_loss=0.0, categ_loss=0.0, cont_loss=0.0")
             for batch_idx, batch in enumerate(self.train_dataloader):
                 self.optimizer.zero_grad()
-                texts, params = batch
-                outputs = self.model(texts, tgt=params)
+                texts_batch, tensor_batch, params_batch = batch
+
+                outputs = self.model(texts_batch, tgt=tensor_batch)
                 total_loss, categ_loss, cont_loss = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=batch['categorical'].to(DEVICE),
+                    categ_target=params_batch['categorical'].to(DEVICE),
                     cont_pred=outputs['continuous'],
-                    cont_target=batch['continuous'].to(DEVICE)
+                    cont_target=params_batch['continuous'].to(DEVICE)
                 )
                 total_loss.backward()
                 self.optimizer.step()
@@ -98,13 +100,13 @@ class Trainer():
         total_loss = 0.0
         with torch.no_grad():
             for batch in data_loader:
-                texts, params = batch
-                outputs = self.model(texts, tgt=params)
+                texts, tensor_batch, params_batch = batch
+                outputs = self.model(texts, tgt=tensor_batch)
                 loss, _, _ = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=batch['categorical'].to(DEVICE),
+                    categ_target=params_batch['categ'].to(DEVICE),
                     cont_pred=outputs['continuous'].to(DEVICE),
-                    cont_target=batch['continuous'].to(DEVICE)
+                    cont_target=params_batch['cont'].to(DEVICE)
                 )
                 total_loss += loss.item()
         avg_loss = total_loss / len(data_loader)
@@ -198,3 +200,4 @@ class Trainer():
         self.train_losses = checkpoint.get('train_losses', [])
         self.val_losses = checkpoint.get('val_losses', [])
         return checkpoint['epoch']
+    

@@ -189,8 +189,9 @@ class PresetGenDecoder(nn.Module):
 
     def forward(
         self,
-        tgt,
-        memory,
+        tgt_cont: Tensor,
+        tgt_categ: Tensor,
+        memory: Tensor,
         tgt_mask: Optional[Tensor] = None,
         memory_mask: Optional[Tensor] = None,
         tgt_key_padding_mask: Optional[Tensor] = None,
@@ -198,9 +199,8 @@ class PresetGenDecoder(nn.Module):
         tgt_is_causal: bool = False,
         memory_is_causal: bool = False,
     ) -> Tuple[dict, dict]:
-        continuous_output = tgt['continuous']  # (batch, seq_len, embed_dim)
-        categorical_output = tgt['categorical']  # (batch, seq_len, embed_dim)
-
+        categorical_output = tgt_categ  # (batch, seq_len, embed_dim)
+        continuous_output = tgt_cont # (batch, seq_len, embed_dim)
         continuous_intermediates = [continuous_output]
         categorical_intermediates = [categorical_output]
 
