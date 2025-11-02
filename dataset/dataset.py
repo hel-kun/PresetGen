@@ -83,7 +83,7 @@ class Synth1Dataset(Dataset):
             label = item["label"]
             text = label["text"]
             texts.append(text)
-            preset = item["params"]
+            preset = item["preset"]
             param_dict = {
                 "categorical": {k: v for k, v in preset.categorical_param.__dict__.items()},
                 "continuius": {k: v for k, v in preset.continuius_param.__dict__.items()},
