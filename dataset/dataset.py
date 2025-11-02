@@ -110,7 +110,8 @@ class Synth1Dataset(Dataset):
         for name in CONTINUOUS_PARAM_NAMES:
             cont_params[name] = torch.tensor(cont_params[name], dtype=torch.float)
         for name in MISC_PARAM_NAMES:
-            misc_params[name] = torch.tensor(misc_params[name], dtype=torch.float)
+            # TODO: cont_paramの正規化をちゃんとする(全部のパラメータが0~127の範囲にあるわけではない)
+            misc_params[name] = torch.tensor(misc_params[name], dtype=torch.float) / 127.0
 
         batch_size = len(batch)
 
@@ -121,11 +122,9 @@ class Synth1Dataset(Dataset):
         tensor_batch = {
             'categ': categ_embed,
             'cont': cont_embed,
-            'misc': misc_embed
         }
         params_batch = {
             'categ': categ_params,
             'cont': cont_params,
-            'misc': misc_params
         }
         return texts, tensor_batch, params_batch                                                        

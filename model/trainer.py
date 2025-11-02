@@ -59,9 +59,9 @@ class Trainer():
                 outputs = self.model(texts_batch, tgt=tensor_batch)
                 total_loss, categ_loss, cont_loss = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=params_batch['categ'].to(DEVICE),
+                    categ_target=tensor_batch['categ'].to(DEVICE),
                     cont_pred=outputs['continuous'],
-                    cont_target=params_batch['cont'].to(DEVICE)
+                    cont_target=tensor_batch['cont'].to(DEVICE)
                 )
                 total_loss.backward()
                 self.optimizer.step()
@@ -104,9 +104,9 @@ class Trainer():
                 outputs = self.model(texts, tgt=tensor_batch)
                 loss, _, _ = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=params_batch['categ'].to(DEVICE),
-                    cont_pred=outputs['continuous'].to(DEVICE),
-                    cont_target=params_batch['cont'].to(DEVICE)
+                    categ_target=tensor_batch['categ'].to(DEVICE),
+                    cont_pred=outputs['continuous'],
+                    cont_target=tensor_batch['cont'].to(DEVICE)
                 )
                 total_loss += loss.item()
         avg_loss = total_loss / len(data_loader)
@@ -129,21 +129,21 @@ class Trainer():
                 outputs = self.model(texts, tgt=tensor_batch)
                 loss, _, _ = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=params_batch['categ'].to(DEVICE),
+                    categ_target=tensor_batch['categ'].to(DEVICE),
                     cont_pred=outputs['continuous'].to(DEVICE),
-                    cont_target=params_batch['cont'].to(DEVICE)
+                    cont_target=tensor_batch['cont'].to(DEVICE)
                 )
                 total_loss += loss.item()
 
                 # ContinuousパラメータのMAE計算
                 cont_pred = outputs['continuous']
-                cont_target = params_batch['cont'].to(DEVICE)
+                cont_target = tensor_batch['cont'].to(DEVICE)
                 cont_mae += torch.abs(cont_pred - cont_target).sum().item()
                 cont_count += cont_target.numel()
 
                 # CategoricalパラメータのAccuracy計算
                 categ_pred = outputs['categorical']
-                categ_target = params_batch['categ'].to(DEVICE)
+                categ_target = tensor_batch['categ'].to(DEVICE)
                 for param_name in categ_target.keys():
                     pred_labels = torch.argmax(categ_pred[param_name], dim=1)
                     true_labels = categ_target[param_name]
