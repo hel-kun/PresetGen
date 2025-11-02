@@ -36,9 +36,9 @@ class Trainer():
         self.logger = logger or logging.getLogger(__name__)
 
         dataset = dataset
-        self.train_dataloader = DataLoader(dataset.dataset['train'], batch_size=32, shuffle=True)
-        self.val_dataloader = DataLoader(dataset.dataset['validation'], batch_size=32, shuffle=False)
-        self.test_dataloader = DataLoader(dataset.dataset['test'], batch_size=32, shuffle=False)
+        self.train_dataloader = DataLoader(dataset.dataset['train'], batch_size=32, shuffle=True, collate_fn=dataset.collate_fn)
+        self.val_dataloader = DataLoader(dataset.dataset['validation'], batch_size=32, shuffle=False, collate_fn=dataset.collate_fn)
+        self.test_dataloader = DataLoader(dataset.dataset['test'], batch_size=32, shuffle=False, collate_fn=dataset.collate_fn)
     
     def train(self, num_epochs: int, resume_from_checkpoint: Optional[str] = None) -> None:
         start_epoch = 0
