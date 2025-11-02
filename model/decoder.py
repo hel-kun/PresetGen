@@ -238,10 +238,11 @@ class PresetGenDecoder(nn.Module):
         continuous_output = self.continuous_norm(continuous_output)
 
         outputs = {'categorical': {}, 'continuous': {}}
-        for name, head in self.categorical_param_heads.items():
-            outputs['categorical'][name] = head(categorical_output)  # (batch, seq_len, param_size)
 
+        for name, head in self.categorical_param_heads.items():
+            outputs['categorical'][name] = head(categorical_output.squeeze(1))
+        
         for name, head in self.continuius_param_heads.items():
-            outputs['continuous'][name] = head(continuous_output).squeeze(-1)  # (batch, seq_len)
+            outputs['continuous'][name] = head(continuous_output.squeeze(1))
 
         return outputs

@@ -42,7 +42,6 @@ def main(args):
 
     trainer.evaluate(trainer.test_dataloader)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PresetGen")
 
@@ -60,6 +59,10 @@ if __name__ == "__main__":
     parser.add_argument("--save-interval", type=int, default=10, help="Model save interval (in epochs)")
     parser.add_argument("--log-interval", type=int, default=10, help="Logging interval (in batches)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
+
+    # lossのパラメータ
+    parser.add_argument("--cont-weight", type=float, default=1.0, help="Weight for continuous parameters loss")
+    parser.add_argument("--categ-weight", type=float, default=1.0, help="Weight for categorical parameters loss")
 
     parser.add_argument("--resume-from-checkpoint", type=str, default=None, help="Path to checkpoint to resume training from")
     parser.add_argument("--eval-only", action="store_true", help="Run evaluation only")

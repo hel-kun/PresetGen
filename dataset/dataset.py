@@ -1,6 +1,7 @@
 import os, re
 import tqdm, logging
 import torch
+import torch.nn as nn
 from datasets import load_dataset
 from torch.utils.data import Dataset
 from dotenv import load_dotenv
@@ -104,20 +105,33 @@ class Synth1Dataset(Dataset):
                 cont_params[name].append(getattr(preset.continuius_param, name))
             for name in MISC_PARAM_NAMES:
                 misc_params[name].append(getattr(preset.misc_param, name))
-            
+
         for name in CATEGORICAL_PARAM_NAMES:
             categ_params[name] = torch.tensor(categ_params[name], dtype=torch.long)
         for name in CONTINUOUS_PARAM_NAMES:
-            cont_params[name] = torch.tensor(cont_params[name], dtype=torch.float)
+            # 連続値パラメータを0~1の範囲に正規化
+            cont_params[name] = torch.tensor(cont_params[name], dtype=torch.float) / 127.0
         for name in MISC_PARAM_NAMES:
-            # TODO: cont_paramの正規化をちゃんとする(全部のパラメータが0~127の範囲にあるわけではない)
             misc_params[name] = torch.tensor(misc_params[name], dtype=torch.float) / 127.0
 
         batch_size = len(batch)
 
         categ_embed = torch.zeros(batch_size, 1, self.embed_dim)
+        embed_idx = 0
+        for name in list(CATEGORICAL_PARAM_NAMES)[:min(5, len(CATEGORICAL_PARAM_NAMES))]:
+            if embed_idx + 5 <= self.embed_dim:
+                for i in range(batch_size):
+                    val = categ_params[name][i].item()
+                    if val < 5:  # 5カテゴリまで対応
+                        categ_embed[i, 0, embed_idx + val] = 1.0
+                embed_idx += 5
+
         cont_embed = torch.zeros(batch_size, 1, self.embed_dim)
-        misc_embed = torch.zeros(batch_size, 1, self.embed_dim)
+        embed_idx = 0
+        for name in list(CONTINUOUS_PARAM_NAMES)[:min(self.embed_dim, len(CONTINUOUS_PARAM_NAMES))]:
+            if embed_idx < self.embed_dim:
+                cont_embed[:, 0, embed_idx] = cont_params[name].mean()  # バッチの平均値を使用
+                embed_idx += 1
 
         tensor_batch = {
             'categ': categ_embed,
@@ -127,4 +141,5 @@ class Synth1Dataset(Dataset):
             'categ': categ_params,
             'cont': cont_params,
         }
-        return texts, tensor_batch, params_batch                                                        
+        return texts, tensor_batch, params_batch
+                                                     

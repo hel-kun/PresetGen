@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from config import DEVICE
+from utils.param import CATEGORICAL_PARAM_NAMES, CONTINUOUS_PARAM_NAMES
 
 class ParamsLoss(nn.Module):
     def __init__(
@@ -24,21 +26,37 @@ class ParamsLoss(nn.Module):
         else:
             self.categ_loss_fn = nn.CrossEntropyLoss(reduction='none')
 
-    def forward(
-        self,
-        categ_pred,
-        categ_target,
-        cont_pred,
-        cont_target
-    ):
-        cont_loss = self.cont_loss_fn(cont_pred, cont_target)
+    def forward(self, categ_pred, categ_target, cont_pred, cont_target):
+        # 連続値パラメータの損失計算
+        cont_losses = []
+        for param_name in CONTINUOUS_PARAM_NAMES:
+            if param_name in cont_pred and param_name in cont_target:
+                param_loss = self.cont_loss_fn(cont_pred[param_name], cont_target[param_name])
+                cont_losses.append(param_loss)
 
-        # Categorical Lossの計算
-        categ_loss = self.categ_loss_fn(categ_pred, categ_target)
-        categ_loss = categ_loss.mean()
+        if cont_losses:
+            cont_loss = torch.stack(cont_losses).mean()
+        else:
+            cont_loss = torch.tensor(0.0, device=DEVICE)
+
+        # カテゴリカルパラメータの損失計算
+        categ_losses = []
+        for param_name in CATEGORICAL_PARAM_NAMES:
+            if param_name in categ_pred and param_name in categ_target:
+                if self.categ_class_weights is not None and param_name in self.categ_loss_fns:
+                    param_loss = self.categ_loss_fns[param_name](categ_pred[param_name], categ_target[param_name])
+                else:
+                    param_loss = self.categ_loss_fn(categ_pred[param_name], categ_target[param_name])
+                categ_losses.append(param_loss.mean())
+
+        if categ_losses:
+            categ_loss = torch.stack(categ_losses).mean()
+        else:
+            categ_loss = torch.tensor(0.0, device=DEVICE)
 
         total_loss = self.cont_weight * cont_loss + self.categ_weight * categ_loss
         return total_loss, self.cont_weight * cont_loss, self.categ_weight * categ_loss
+
 
 # TODO: AudioEmbedLossの実装
 # Synth1をCLI(Python)でうこかせるようにしないと実装できないかも
