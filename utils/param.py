@@ -238,3 +238,37 @@ PARAM_ID_TO_NAME = {
   97: "osc1_sub_octave",
   98: "delay_tone"
 }
+
+CATEG_PARAM_SIZE = {
+    "osc1_shape": 4,
+    "osc2_shape": 4,
+    "osc2_kbd_track": 2,
+    "osc2_sync": 2,
+    "osc2_ring_modulation": 2,
+    "osc_mod_env_on_off": 2,
+    "filter_type": 4,
+    "filter_velocity_switch": 2,
+    "arpeggiator_type": 4,
+    "arpeggiator_oct_range": 4,
+    "play_mode_type": 3,
+    "lfo1_destination": 5,
+    "lfo1_type": 4,
+    "lfo2_destination": 5,
+    "lfo2_type": 4,
+    "lfo1_on_off": 2,
+    "lfo2_on_off": 2,
+    "arpeggiator_on_off": 2,
+    "chorus_type": 4,
+    "delay_on_off": 2,
+    "chorus_on_off": 2,
+    "lfo1_tempo_sync": 2,
+    "lfo1_key_sync": 2,
+    "lfo2_tempo_sync": 2,
+    "lfo2_key_sync": 2,
+    "osc_mod_dest": 3,
+    "unison_mode": 3,
+    "portament_auto_mode": 2,
+    "effect_on_off": 2,
+    "effect_type": 4,
+    "delay_type": 4
+}

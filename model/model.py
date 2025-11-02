@@ -3,6 +3,7 @@ from torch import nn
 from config import DEVICE
 from model.encoder import CLAPTextEncorder, RoBERTaTextEncorder
 from model.decoder import PresetGenDecoder
+from utils.param import CATEG_PARAM_SIZE
 
 class PresetGenModel(nn.Module):
     def __init__(self, embedding_dim=512, num_heads=8, num_layers=6, dropout=0.1):
@@ -13,7 +14,8 @@ class PresetGenModel(nn.Module):
             embed_dim=embedding_dim,
             num_heads=num_heads,
             num_layers=num_layers,
-            dropout=dropout
+            dropout=dropout,
+            categorical_param_size=CATEG_PARAM_SIZE
         )
 
     def forward(self, src, tgt=None):
