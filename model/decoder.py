@@ -205,7 +205,7 @@ class PresetGenDecoder(nn.Module):
         categorical_intermediates = [categorical_output]
 
         for i in range(self.num_layers):
-            categorical_output = self.categorical_decoder_layer[i](
+            categorical_output = self.categorical_decoder_layer(
                 categorical_output,
                 memory,
                 continuous_intermediates[-1],
@@ -217,7 +217,7 @@ class PresetGenDecoder(nn.Module):
                 tgt_is_causal=tgt_is_causal,
                 memory_is_causal=memory_is_causal,
             )
-            continuous_output = self.continuius_decoder_layer[i](
+            continuous_output = self.continuius_decoder_layer(
                 continuous_output,
                 memory,
                 categorical_intermediates[-1],

@@ -59,9 +59,9 @@ class Trainer():
                 outputs = self.model(texts_batch, tgt=tensor_batch)
                 total_loss, categ_loss, cont_loss = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=params_batch['categorical'].to(DEVICE),
+                    categ_target=params_batch['categ'].to(DEVICE),
                     cont_pred=outputs['continuous'],
-                    cont_target=params_batch['continuous'].to(DEVICE)
+                    cont_target=params_batch['cont'].to(DEVICE)
                 )
                 total_loss.backward()
                 self.optimizer.step()
@@ -123,27 +123,27 @@ class Trainer():
         categ_accuracies = {}
         categ_total = 0
         with torch.no_grad():
-            
             for batch in tqdm.tqdm(data_loader, desc="Detailed Evaluation"):
                 # 全体のLoss計算
-                outputs = self.model(batch['input'].to(DEVICE))
+                texts, tensor_batch, params_batch = batch
+                outputs = self.model(texts, tgt=tensor_batch)
                 loss, _, _ = self.criterion(
                     categ_pred=outputs['categorical'],
-                    categ_target=batch['categorical'].to(DEVICE),
+                    categ_target=params_batch['categ'].to(DEVICE),
                     cont_pred=outputs['continuous'].to(DEVICE),
-                    cont_target=batch['continuous'].to(DEVICE)
+                    cont_target=params_batch['cont'].to(DEVICE)
                 )
                 total_loss += loss.item()
 
                 # ContinuousパラメータのMAE計算
                 cont_pred = outputs['continuous']
-                cont_target = batch['continuous'].to(DEVICE)
+                cont_target = params_batch['cont'].to(DEVICE)
                 cont_mae += torch.abs(cont_pred - cont_target).sum().item()
                 cont_count += cont_target.numel()
 
                 # CategoricalパラメータのAccuracy計算
                 categ_pred = outputs['categorical']
-                categ_target = batch['categorical'].to(DEVICE)
+                categ_target = params_batch['categ'].to(DEVICE)
                 for param_name in categ_target.keys():
                     pred_labels = torch.argmax(categ_pred[param_name], dim=1)
                     true_labels = categ_target[param_name]
