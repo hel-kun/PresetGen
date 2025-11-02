@@ -53,7 +53,8 @@ class Trainer():
             train_bar = tqdm.tqdm(total=len(self.train_dataloader), desc=f"Epoch {epoch+1}/{num_epochs}", postfix="total_loss=0.0, categ_loss=0.0, cont_loss=0.0")
             for batch_idx, batch in enumerate(self.train_dataloader):
                 self.optimizer.zero_grad()
-                outputs = self.model(batch['input'].to(DEVICE))
+                texts, params = batch
+                outputs = self.model(texts.to(DEVICE), tgt=params)
                 total_loss, categ_loss, cont_loss = self.criterion(
                     categ_pred=outputs['categorical'],
                     categ_target=batch['categorical'].to(DEVICE),
@@ -97,7 +98,8 @@ class Trainer():
         total_loss = 0.0
         with torch.no_grad():
             for batch in data_loader:
-                outputs = self.model(batch['input'].to(DEVICE))
+                texts, params = batch
+                outputs = self.model(texts.to(DEVICE), tgt=params)
                 loss, _, _ = self.criterion(
                     categ_pred=outputs['categorical'],
                     categ_target=batch['categorical'].to(DEVICE),
