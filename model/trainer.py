@@ -54,7 +54,7 @@ class Trainer():
             for batch_idx, batch in enumerate(self.train_dataloader):
                 self.optimizer.zero_grad()
                 texts, params = batch
-                outputs = self.model(texts.to(DEVICE), tgt=params)
+                outputs = self.model(texts, tgt=params)
                 total_loss, categ_loss, cont_loss = self.criterion(
                     categ_pred=outputs['categorical'],
                     categ_target=batch['categorical'].to(DEVICE),
@@ -99,7 +99,7 @@ class Trainer():
         with torch.no_grad():
             for batch in data_loader:
                 texts, params = batch
-                outputs = self.model(texts.to(DEVICE), tgt=params)
+                outputs = self.model(texts, tgt=params)
                 loss, _, _ = self.criterion(
                     categ_pred=outputs['categorical'],
                     categ_target=batch['categorical'].to(DEVICE),
