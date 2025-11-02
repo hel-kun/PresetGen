@@ -22,8 +22,8 @@ class PresetGenModel(nn.Module):
             # 推論モード(のはず)
             batch_size = text_embeddings.size(0)
             tgt = {
-                'cont': torch.zeros(batch_size, 1, self.embedding_dim),
-                'categ': torch.zeros(batch_size, 1, self.embedding_dim)
+                'cont': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),
+                'categ': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),
             }
 
         if isinstance(self.text_encoder, RoBERTaTextEncorder):

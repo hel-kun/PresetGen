@@ -201,6 +201,7 @@ class PresetGenDecoder(nn.Module):
     ) -> Tuple[dict, dict]:
         categorical_output = tgt_categ  # (batch, seq_len, embed_dim)
         continuous_output = tgt_cont # (batch, seq_len, embed_dim)
+
         continuous_intermediates = [continuous_output]
         categorical_intermediates = [categorical_output]
 

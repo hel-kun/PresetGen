@@ -55,6 +55,8 @@ class Trainer():
             for batch_idx, batch in enumerate(self.train_dataloader):
                 self.optimizer.zero_grad()
                 texts_batch, tensor_batch, params_batch = batch
+                for key in tensor_batch:
+                    tensor_batch[key] = tensor_batch[key].to(DEVICE)
                 for key in params_batch['categ']:
                     params_batch['categ'][key] = params_batch['categ'][key].to(DEVICE)
                 for key in params_batch['cont']:
