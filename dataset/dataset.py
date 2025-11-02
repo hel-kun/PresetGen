@@ -40,8 +40,9 @@ class Synth1Dataset(Dataset):
 
         lines = item.strip().split('\n')
         for line in lines:
-            # メタデータ行はスキップ
             if not re.match(r'^\d+,\d+$', line.strip()): continue
+            if line.strip().endswith('.'):
+                line = line.strip()[:-1]
             param_id, value = map(int, line.split(','))
             param_name = PARAM_ID_TO_NAME[param_id] if param_id in PARAM_ID_TO_NAME else None
             if param_name in CATEGORICAL_PARAM_NAMES:
@@ -91,4 +92,4 @@ class Synth1Dataset(Dataset):
             }
             params_batch.append(param_dict)
   
-        return texts, params_batch
+        return texts, params_batch      
