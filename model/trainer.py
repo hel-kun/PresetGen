@@ -99,6 +99,8 @@ class Trainer():
                         break
 
             plot_loss_curve(self.train_losses, self.val_losses, save_path=f"{self.checkpoint_path}/loss_curve.png")
+            if (epoch + 1) % 10 == 0:
+                self._save_checkpoint(epoch)
         
 
     def evaluate(self, data_loader: DataLoader) -> float:
