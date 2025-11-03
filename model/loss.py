@@ -31,7 +31,8 @@ class ParamsLoss(nn.Module):
         cont_losses = []
         for param_name in CONTINUOUS_PARAM_NAMES:
             if param_name in cont_pred and param_name in cont_target:
-                param_loss = self.cont_loss_fn(cont_pred[param_name], cont_target[param_name])
+                pred = cont_pred[param_name].squeeze(1) if cont_pred[param_name].dim() > 1 else cont_pred[param_name]
+                param_loss = self.cont_loss_fn(pred, cont_target[param_name])
                 cont_losses.append(param_loss)
 
         if cont_losses:
@@ -43,11 +44,10 @@ class ParamsLoss(nn.Module):
         categ_losses = []
         for param_name in CATEGORICAL_PARAM_NAMES:
             if param_name in categ_pred and param_name in categ_target:
-                pred = cont_pred[param_name].squeeze(1) if cont_pred[param_name].dim() > 1 else cont_pred[param_name]
                 if self.categ_class_weights is not None and param_name in self.categ_loss_fns:
-                    param_loss = self.categ_loss_fns[param_name](pred, categ_target[param_name])
+                    param_loss = self.categ_loss_fns[param_name](categ_pred[param_name], categ_target[param_name])
                 else:
-                    param_loss = self.categ_loss_fn(pred, categ_target[param_name])
+                    param_loss = self.categ_loss_fn(categ_pred[param_name], categ_target[param_name])
                 categ_losses.append(param_loss.mean())
 
         if categ_losses:
