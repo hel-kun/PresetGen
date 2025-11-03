@@ -11,6 +11,10 @@ from config import DEVICE
 def main(args):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    logger.addHandler(console_handler)
+
     dataset = Synth1Dataset(logger=logger, embed_dim=args.embedding_dim)
     model = PresetGenModel(
         embedding_dim=args.embedding_dim,
