@@ -166,7 +166,7 @@ class Trainer():
 
                 # CategoricalパラメータのAccuracy計算
                 categ_pred = outputs['categorical']
-                categ_target = tensor_batch['categ'].to(DEVICE)
+                categ_target = params_batch['categ']
                 for param_name in categ_target.keys():
                     pred_labels = torch.argmax(categ_pred[param_name], dim=1)
                     true_labels = categ_target[param_name]
