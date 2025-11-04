@@ -132,9 +132,7 @@ class Trainer():
         total_loss = 0.0
         cont_mae = 0.0
         cont_count = 0
-        categ_correct = 0
         categ_accuracies = {}
-        categ_total = 0
         categ_totals = {}
         with torch.no_grad():
             for batch in tqdm.tqdm(data_loader, desc="Detailed Evaluation"):
@@ -182,6 +180,8 @@ class Trainer():
                     categ_accuracies[param_name] += correct
                     categ_totals[param_name] += total
 
+        categ_correct = sum(categ_accuracies.values())
+        categ_total = sum(categ_totals.values())
         cont_mae = cont_mae / cont_count if cont_count > 0 else 0.0
         avg_loss = total_loss / len(data_loader)
 
