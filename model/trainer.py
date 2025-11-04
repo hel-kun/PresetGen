@@ -101,7 +101,6 @@ class Trainer():
             plot_loss_curve(self.train_losses, self.val_losses, save_path=f"{self.checkpoint_path}/loss_curve.png")
             if (epoch + 1) % 10 == 0:
                 self._save_checkpoint(epoch)
-        
 
     def evaluate(self, data_loader: DataLoader) -> float:
         self.model.eval()
@@ -157,9 +156,13 @@ class Trainer():
 
                 # ContinuousパラメータのMAE計算
                 cont_pred = outputs['continuous']
-                cont_target = tensor_batch['cont'].to(DEVICE)
-                cont_mae += torch.abs(cont_pred - cont_target).sum().item()
-                cont_count += cont_target.numel()
+                cont_target = params_batch['cont']
+                for param_name in cont_pred.keys():
+                    if param_name in cont_target:
+                        pred_values = cont_pred[param_name]
+                        true_values = cont_target[param_name]
+                        cont_mae += torch.abs(pred_values - true_values).sum().item()
+                        cont_count += true_values.numel()
 
                 # CategoricalパラメータのAccuracy計算
                 categ_pred = outputs['categorical']
