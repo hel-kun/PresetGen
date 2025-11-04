@@ -44,7 +44,7 @@ def main(args):
             resume_from_checkpoint=args.resume_from_checkpoint
         )
 
-    trainer.evaluate(trainer.test_dataloader)
+    trainer.evaluate_detailed(trainer.test_dataloader)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PresetGen")
