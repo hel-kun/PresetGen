@@ -135,6 +135,7 @@ class Trainer():
         categ_correct = 0
         categ_accuracies = {}
         categ_total = 0
+        categ_totals = {}
         with torch.no_grad():
             for batch in tqdm.tqdm(data_loader, desc="Detailed Evaluation"):
                 # 全体のLoss計算
@@ -175,8 +176,11 @@ class Trainer():
 
                     if param_name not in categ_accuracies:
                         categ_accuracies[param_name] = 0
+                    if param_name not in categ_totals:
+                        categ_totals[param_name] = 0
+
                     categ_accuracies[param_name] += correct
-                    categ_total += total
+                    categ_totals[param_name] += total
 
         cont_mae = cont_mae / cont_count if cont_count > 0 else 0.0
         avg_loss = total_loss / len(data_loader)
@@ -186,7 +190,7 @@ class Trainer():
         self.logger.info(f"Categorical Params Overall Accuracy: {categ_correct / categ_total if categ_total > 0 else 0.0:.4f}")
 
         for param_name in categ_accuracies.keys():
-            accuracy = categ_accuracies[param_name] / categ_total if categ_total > 0 else 0.0
+            accuracy = categ_accuracies[param_name] / categ_totals[param_name] if categ_totals[param_name] > 0 else 0.0
             self.logger.info(f"Categorical Param: {param_name}, Accuracy: {accuracy:.4f}")
 
         # save detailed results to a text file
@@ -196,7 +200,7 @@ class Trainer():
             f.write(f"Continuous Params MAE: {cont_mae:.4f}\n")
             f.write(f"Categorical Params Overall Accuracy: {categ_correct / categ_total if categ_total > 0 else 0.0:.4f}\n")
             for param_name in categ_accuracies.keys():
-                accuracy = categ_accuracies[param_name] / categ_total if categ_total > 0 else 0.0
+                accuracy = categ_accuracies[param_name] / categ_totals[param_name] if categ_totals[param_name] > 0 else 0.0
                 f.write(f"Categorical Param: {param_name}, Accuracy: {accuracy:.4f}\n")
 
     def _save_checkpoint(self, epoch: int, is_best: bool = False) -> None:
