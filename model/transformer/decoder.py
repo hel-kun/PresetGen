@@ -14,6 +14,11 @@ class TransformerDecoder(nn.Module):
         categorical_param_size: Optional[dict] = None
     ):
         super().__init__()
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.num_layers = num_layers
+        self.dropout = dropout
+
         self.categ_layer = nn.TransformerDecoderLayer(
             d_model=embed_dim,
             nhead=num_heads,
