@@ -119,10 +119,10 @@ class DsaCnnDecoder(nn.Module):
         pooled_categ = nn.functional.adaptive_avg_pool1d(feat_categ, 1).squeeze(-1)  # (B, C, 1) -> (B, C)
         pooled_cont = nn.functional.adaptive_avg_pool1d(feat_cont, 1).squeeze(-1)  # (B, C, 1) -> (B, C)
 
-        categ_outputs = {
-            name: head(pooled_categ) for name, head in self.categ_param_heads.items()
-        }
-        cont_outputs = {
-            name: head(pooled_cont) for name, head in self.cont_param_heads.items()
-        }
-        return categ_outputs, cont_outputs
+        outputs = {'categorical': {}, 'continuous': {}}
+        for name, head in self.categ_param_heads.items():
+            outputs['categorical'][name] = head(pooled_categ)
+        for name, head in self.cont_param_heads.items():
+            outputs['continuous'][name] = head(pooled_cont)
+        
+        return outputs
