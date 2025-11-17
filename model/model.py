@@ -2,8 +2,10 @@ import torch
 from torch import nn
 from config import DEVICE
 from model.encoder import CLAPTextEncorder, RoBERTaTextEncorder
-from model.decoder import PresetGenDecoder
-from utils.param import CATEG_PARAM_SIZE
+from model.presetgen.decoder import PresetGenDecoder
+from model.transformer.decoder import TransformerDecoder
+from utils.param import *
+from typing import Tuple
 
 class PresetGenModel(nn.Module):
     def __init__(self, embedding_dim=512, num_heads=8, num_layers=6, dropout=0.1):
@@ -22,6 +24,42 @@ class PresetGenModel(nn.Module):
         text_embeddings = self.text_encoder(src)
         if tgt is None:
             # 推論モード(のはず)
+            batch_size = text_embeddings.size(0)
+            tgt = {
+                'cont': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),
+                'categ': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),
+            }
+
+        if isinstance(self.text_encoder, RoBERTaTextEncorder):
+            memory_key_padding_mask = self.text_encoder.tokenizer.get_padding_mask(src).to(DEVICE)
+        else:
+            memory_key_padding_mask = None
+        outputs = self.decoder(
+            tgt_cont=tgt['cont'].to(DEVICE),
+            tgt_categ=tgt['categ'].to(DEVICE),
+            memory=text_embeddings,
+            memory_key_padding_mask=memory_key_padding_mask
+        )
+
+        return outputs
+    
+# アブレーションスタディ用モデル1(Decoderを普通のTransformerに変更)
+class TransformerModel(nn.Module): 
+    def __init__(self, embedding_dim=512, num_heads=8, num_layers=6, dropout=0.1):
+        super(TransformerModel, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.text_encoder = CLAPTextEncorder(output_dim=embedding_dim)
+        self.decoder = TransformerDecoder(
+            embed_dim=embedding_dim,
+            num_heads=num_heads,
+            num_layers=num_layers,
+            dropout=dropout,
+            categorical_param_size=CATEG_PARAM_SIZE
+        )
+
+    def forward(self, src, tgt=None):
+        text_embeddings = self.text_encoder(src)
+        if tgt is None:
             batch_size = text_embeddings.size(0)
             tgt = {
                 'cont': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),

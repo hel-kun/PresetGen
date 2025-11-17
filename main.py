@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import torch
 from dataset.dataset import Synth1Dataset
-from model.model import PresetGenModel
+from model.model import PresetGenModel, TransformerModel
 from model.trainer import Trainer
 from model.loss import ParamsLoss
 from config import DEVICE
@@ -16,13 +16,24 @@ def main(args):
     logger.addHandler(console_handler)
 
     dataset = Synth1Dataset(logger=logger, embed_dim=args.embedding_dim)
-    model = PresetGenModel(
-        embedding_dim=args.embedding_dim,
-        num_heads=args.num_heads,
-        num_layers=args.num_layers,
-        dropout=args.dropout
-    )
-
+    if args.model == "PresetGen":
+        model = PresetGenModel(
+            embedding_dim=args.embedding_dim,
+            num_heads=args.num_heads,
+            num_layers=args.num_layers,
+            dropout=args.dropout
+        )
+    elif args.model == "Transformer":
+        model = TransformerModel(
+            embedding_dim=args.embedding_dim,
+            num_heads=args.num_heads,
+            num_layers=args.num_layers,
+            dropout=args.dropout
+        )
+    else:
+        raise ValueError(f"Unknown model type: {args.model}")
+    
+    
     if args.eval_only or args.resume_from_checkpoint:
         date = args.resume_from_checkpoint.split('/')[-2]
     else: 
@@ -50,6 +61,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PresetGen")
 
     # データセットとモデルのパラメータ
+    parser.add_argument("--model", type=str, default="PresetGen", choices=["PresetGen", "Transformer"], help="Model type to use")
     parser.add_argument("--embedding-dim", type=int, default=512, help="Embedding dimension")
     parser.add_argument("--num-heads", type=int, default=8, help="Number of transformer attention heads")
     parser.add_argument("--num-layers", type=int, default=6, help="Number of transformer layers")

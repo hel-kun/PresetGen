@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from typing import Optional
 import logging, tqdm, os
-from model.model import PresetGenModel
+from model.model import PresetGenModel, TransformerModel
 from model.loss import ParamsLoss, AudioEmbedLoss
 from dataset.dataset import Synth1Dataset
 from config import DEVICE
