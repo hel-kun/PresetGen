@@ -106,23 +106,23 @@ class DsaCnnDecoder(nn.Module):
             ) for name in CONTINUOUS_PARAM_NAMES
         })
 
-    def forward(self, tgt_cont: Tensor, tgt_categ: Tensor) -> Tuple[dict, dict]:
-        categ_x = tgt_categ.permute(0, 2, 1)  # (B, 1, C) -> (B, C, 1)
-        cont_x = tgt_cont.permute(0, 2, 1)    # (B, 1, C) -> (B, C, 1)
+    def forward(self, tgt_cont: Tensor, tgt_categ: Tensor, memory: Tensor) -> Tuple[dict, dict]:
+        x = memory.permute(0, 2, 1)  # (B, L, C) -> (B, C, L)
+        feat_categ = x
+        feat_cont = x
 
-        for conv_categ, conv_cont, atten in zip(self.categ_convs, self.cont_convs, self.atten_layers):
-            categ_x = conv_categ(categ_x)
-            cont_x = conv_cont(cont_x)
-            categ_x, cont_x = atten(categ_x, cont_x)
-
-        categ_x = categ_x.permute(0, 2, 1)  # (B, C, 1) -> (B, 1, C)
-        cont_x = cont_x.permute(0, 2, 1)    # (B, C, 1) -> (B, 1, C)
+        for conv_categ, conv_cont, atten_layer in zip(self.categ_convs, self.cont_convs, self.atten_layers):
+            feat_categ = conv_categ(feat_categ)
+            feat_cont = conv_cont(feat_cont)
+            feat_categ, feat_cont = atten_layer(feat_categ, feat_cont)
+        
+        pooled_categ = nn.functional.adaptive_avg_pool1d(feat_categ, 1).squeeze(-1)  # (B, C, 1) -> (B, C)
+        pooled_cont = nn.functional.adaptive_avg_pool1d(feat_cont, 1).squeeze(-1)  # (B, C, 1) -> (B, C)
 
         categ_outputs = {
-            name: head(categ_x) for name, head in self.categ_param_heads.items()
+            name: head(pooled_categ) for name, head in self.categ_param_heads.items()
         }
         cont_outputs = {
-            name: head(cont_x) for name, head in self.cont_param_heads.items()
+            name: head(pooled_cont) for name, head in self.cont_param_heads.items()
         }
         return categ_outputs, cont_outputs
-
