@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import torch
 from dataset.dataset import Synth1Dataset
-from model.model import PresetGenModel, TransformerModel
+from model.model import PresetGenModel, TransformerModel, DsaCnnModel
 from model.trainer import Trainer
 from model.loss import ParamsLoss
 from config import DEVICE
@@ -30,6 +30,15 @@ def main(args):
             num_layers=args.num_layers,
             dropout=args.dropout
         )
+    elif args.model == "DsaCnn":
+        model = DsaCnnModel(
+            embedding_dim=args.embedding_dim,
+            num_heads=args.num_heads,
+            num_layers=args.num_layers,
+            dropout=args.dropout
+        )
+    elif args.model == "Cnn":
+        raise NotImplementedError("Cnn model is not implemented yet.")
     else:
         raise ValueError(f"Unknown model type: {args.model}")
     
@@ -61,7 +70,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PresetGen")
 
     # データセットとモデルのパラメータ
-    parser.add_argument("--model", type=str, default="PresetGen", choices=["PresetGen", "Transformer"], help="Model type to use")
+    parser.add_argument("--model", type=str, default="PresetGen", choices=["PresetGen", "Transformer", "DsaCnn", "Cnn"], help="Model type to use")
     parser.add_argument("--embedding-dim", type=int, default=512, help="Embedding dimension")
     parser.add_argument("--num-heads", type=int, default=8, help="Number of transformer attention heads")
     parser.add_argument("--num-layers", type=int, default=6, help="Number of transformer layers")
