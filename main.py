@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import torch
 from dataset.dataset import Synth1Dataset
-from model.model import PresetGenModel, TransformerModel, DsaCnnModel
+from model.model import PresetGenModel, TransformerModel, DsaCnnModel, CnnModel
 from model.trainer import Trainer
 from model.loss import ParamsLoss
 from config import DEVICE
@@ -38,7 +38,12 @@ def main(args):
             dropout=args.dropout
         )
     elif args.model == "Cnn":
-        raise NotImplementedError("Cnn model is not implemented yet.")
+        model = CnnModel(
+            embedding_dim=args.embedding_dim,
+            num_heads=args.num_heads,
+            num_layers=args.num_layers,
+            dropout=args.dropout
+        )
     else:
         raise ValueError(f"Unknown model type: {args.model}")
     

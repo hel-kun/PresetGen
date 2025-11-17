@@ -5,6 +5,7 @@ from model.encoder import CLAPTextEncorder, RoBERTaTextEncorder
 from model.presetgen.decoder import PresetGenDecoder
 from model.transformer.decoder import TransformerDecoder
 from model.dsa_cnn.decoder import DsaCnnDecoder
+from model.cnn.decoder import CnnDecoder
 from utils.param import *
 from typing import Tuple
 
@@ -87,6 +88,36 @@ class DsaCnnModel(nn.Module):
         self.embedding_dim = embedding_dim
         self.text_encoder = CLAPTextEncorder(output_dim=embedding_dim)
         self.decoder = DsaCnnDecoder(
+            embed_dim=embedding_dim,
+            num_heads=num_heads,
+            num_layers=num_layers,
+            dropout=dropout,
+            categorical_param_size=CATEG_PARAM_SIZE
+        )
+
+    def forward(self, src, tgt=None):
+        text_embeddings = self.text_encoder(src)
+        if tgt is None:
+            batch_size = text_embeddings.size(0)
+            tgt = {
+                'cont': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),
+                'categ': torch.zeros(batch_size, 1, self.embedding_dim, device=DEVICE),
+            }
+
+        outputs = self.decoder(
+            tgt_cont=tgt['cont'].to(DEVICE),
+            tgt_categ=tgt['categ'].to(DEVICE),
+            memory=text_embeddings
+        )
+
+        return outputs
+    
+class CnnModel(nn.Module):
+    def __init__(self, embedding_dim=512, num_heads=8, num_layers=6, dropout=0.1):
+        super(CnnModel, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.text_encoder = CLAPTextEncorder(output_dim=embedding_dim)
+        self.decoder = CnnDecoder(
             embed_dim=embedding_dim,
             num_heads=num_heads,
             num_layers=num_layers,
