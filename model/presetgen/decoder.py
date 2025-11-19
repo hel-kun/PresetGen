@@ -47,6 +47,11 @@ class DualStreamTransformerDecoderLayer(nn.Module):
         self.norm4 = nn.LayerNorm(d_model, eps=layer_norm_eps, bias=bias, **factory_kwargs)
         self.dropout5 = nn.Dropout(dropout)
 
+        if isinstance(activation, str):
+            self.activation = F.gelu if activation == "gelu" else F.relu
+        else:
+            self.activation = activation
+
     def forward(
         self,
         tgt,
@@ -138,7 +143,7 @@ class DualStreamTransformerDecoderLayer(nn.Module):
         return self.dropout3(x)
     
     def _ffn_block(self, x: Tensor) -> Tensor:
-        x = self.linear2(self.dropout4(F.gelu(self.linear1(x))))
+        x = self.linear2(self.dropout4(self.activation(self.linear1(x))))
         return self.dropout5(x)
 
 class PresetGenDecoder(nn.Module):
@@ -183,7 +188,7 @@ class PresetGenDecoder(nn.Module):
         self.continuius_param_heads = nn.ModuleDict({
             name: nn.Sequential(
                 nn.Linear(embed_dim, 1),
-                nn.Sigmoid() # 0〜1に正規化
+                nn.Tanh() # -1〜1に正規化
             ) for name in CONTINUOUS_PARAM_NAMES
         })
 

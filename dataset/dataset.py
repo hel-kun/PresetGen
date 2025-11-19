@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from dotenv import load_dotenv
 from utils.types import *
 from utils.param import *
+from utils.norm_cont_param import NORM_CONT_PARAM_FUNCS
 
 class Synth1Dataset(Dataset):
     def __init__(self, logger: logging.Logger = None, embed_dim: int = 512):
@@ -109,8 +110,8 @@ class Synth1Dataset(Dataset):
         for name in CATEGORICAL_PARAM_NAMES:
             categ_params[name] = torch.tensor(categ_params[name], dtype=torch.long)
         for name in CONTINUOUS_PARAM_NAMES:
-            # 連続値パラメータを0~1の範囲に正規化
-            cont_params[name] = torch.tensor(cont_params[name], dtype=torch.float) / 127.0
+            # 連続値パラメータを-1~1の範囲に正規化
+            cont_params[name] = torch.tensor([NORM_CONT_PARAM_FUNCS[name](val) for val in cont_params[name]], dtype=torch.float)
         for name in MISC_PARAM_NAMES:
             misc_params[name] = torch.tensor(misc_params[name], dtype=torch.float) / 127.0
 

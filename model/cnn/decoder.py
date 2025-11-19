@@ -63,7 +63,7 @@ class CnnDecoder(nn.Module):
         self.cont_param_heads = nn.ModuleDict({
             name: nn.Sequential(
                 nn.Linear(embed_dim, 1),
-                nn.Sigmoid() # 0〜1に正規化
+                nn.Tanh()
             ) for name in CONTINUOUS_PARAM_NAMES
         })
 
