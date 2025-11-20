@@ -188,7 +188,7 @@ class PresetGenDecoder(nn.Module):
         self.continuius_param_heads = nn.ModuleDict({
             name: nn.Sequential(
                 nn.Linear(embed_dim, 1),
-                nn.Tanh() # -1〜1に正規化
+                nn.Sigmoid() # 0〜1に正規化
             ) for name in CONTINUOUS_PARAM_NAMES
         })
 
